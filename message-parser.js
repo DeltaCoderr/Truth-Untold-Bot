@@ -164,7 +164,7 @@ class MessageParser {
 			Client.login();
 			break;
 		case 'updateuser':
-			if (splitMessage[0] !== Config.username) return;
+			if (splitMessage[0].split('@')[0].slice(1) !== Config.username) return;
 
 			if (Client.connectTimeout) clearTimeout(Client.connectTimeout);
 			if (splitMessage[1] !== '1') {
