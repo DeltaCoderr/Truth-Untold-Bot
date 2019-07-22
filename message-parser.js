@@ -95,7 +95,7 @@ class Context {
 	 * @param {string} [newTarget]
 	 * @returns {boolean}
 	 */
-	run(newCommand, newTarget) {
+		run(newCommand, newTarget) {
 		let command = this.command;
 		let target = this.target;
 		let originalCommand = this.originalCommand;
@@ -114,12 +114,25 @@ class Context {
 				target = '';
 			}
 		}
-
-		if (typeof Commands[command] !== 'function') return false;
-
+		
+		if (typeof Commands[command].command !== 'function') return false;
+		
+    if(Commands[command].devOnly && !this.user.isDeveloper()) return false;
+    
+    if(Commands[command].perms){
+      if(!this.user.hasBotRank(this.room,Commands[command].perms)) return false;
+    }
+    
+if(this.room == this.user){
+  if(Commands[command].chatOnly) return false;
+}
+    
+    else{
+      if(Commands[command].pmOnly) return false;
+    }
 		try {
 			// @ts-ignore Typescript bug - issue #10530
-			Commands[command].call(this, target, this.room, this.user, originalCommand, this.time);
+			Commands[command].command.call(this, target, this.room, this.user, originalCommand, this.time);
 		} catch (e) {
 			let stack = e.stack;
 			stack += 'Additional information:\n';
@@ -134,6 +147,7 @@ class Context {
 		return true;
 	}
 }
+
 
 exports.Context = Context;
 
