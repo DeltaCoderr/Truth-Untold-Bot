@@ -36,7 +36,7 @@ let overwriteWarnings = new Map();
 let commands = {
 	// Developer commands
 	js: 'eval',
-	eval: function (target, room, user) {
+	eval: { command(target, room, user) {
 		if (!user.isDeveloper()) return;
 		try {
 			target = eval(target);
@@ -44,44 +44,44 @@ let commands = {
 		} catch (e) {
 			this.say(e.name + ": " + e.message);
 		}
-	}, 
+	},}, 
   
   
   
   
 
   
-  gift: function (target, room, user) {
+  gift: { command(target, room, user) {
 		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
 		let userTar = Users.get(target);
 		if (!userTar) return;
 		this.say("Inside " + userTar.name + "'s gift is ..." + Tools.sample(gifts));
-	},
+	},},
 	
-	joke: function (target, room, user) {
+	joke: { command(target, room, user) {
 		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
 		room.say(Tools.sample(jokes));
-	},      
+	},},      
   
   c: 'roomsay',
-  roomsay: function (target, room, user) {
+  roomsay: { command(target, room, user) {
 		if (!user.isDeveloper()) return;
 		let splitStr = target.split(",");
 		if (splitStr.length !== 2) return;
 		let realroom = Rooms.get(splitStr[0]);
 		if (!realroom) return;
 		realroom.say(splitStr[1]);
-	},
+	},},
   
   jr:'joinroom',
-  joinroom: function (target,room, user){
+  joinroom:{ command(target, room, user) {
     if (!user.isDeveloper() || !(room instanceof Users.User) && !user.hasRank(room, '+')) return;
   
     this.say("/join " + target);
-  },
+  },},},},
   
   
-  pick: function (target, room, user) {
+  pick: { command(target, room, user) {
 		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
 		if (Users.self.hasRank(room, '*')) {
 			let stuff = target.split(",");
@@ -96,10 +96,10 @@ let commands = {
 		else {
 			this.say("!pick " + target);
 		}
-	},
+	},},
   
   
-  timer: function (target, room, user) {
+  timer: { command(target, room, user) {
 		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
 		let x = Math.floor(target);
 		if (!x || x >= 120 || (x < 10 && x > 2) || x <= 0) return room.say("The timer must be between 10 seconds and 2 minutes.");
@@ -109,9 +109,9 @@ let commands = {
 		clearTimeout(Games.timeout);
 		this.say("Timer set for " + (minutes > 0 ? "1 minute" + (seconds > 0 ? " and " : "") : "") + (seconds > 0 ? ((seconds) + " second" + (seconds > 1 ? "s" : "")) : "") + ".");
 		setTimeout(() => this.say("Times Up!"), x * 1000);
-	},
+	},},
    
-  roll: function (target, room, user) {
+  roll: { command(target, room, user) {
 		let realtarget = target;
 		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
 		let plusIndex = target.indexOf("+");
@@ -160,19 +160,19 @@ let commands = {
 		} else {
 			room.say("Rolls: " + rolls.join(",") + " || Total: " + (sum + adder));
 		}
-	},
+	},},
   
   
-	about: function (target, room, user) {
+	about: { command(target, room, user) {
 		if (!(room instanceof Users.User) && !user.hasRank(room, '+')) return;
 		this.say(Config.username + "  https://github.com/Zerapium/Phantom-Ozonix");
-	},
-	help: function (target, room, user) {
+	},},
+	help: { command(target, room, user) {
 		if (!(room instanceof Users.User) && !user.hasRank(room, '+')) return;
 		if (!Config.guide) return this.say("There is no guide available.");
 		this.say(Users.self.name + " guide: " + Config.guide);
-	},
-	mail: function (target, room, user) {
+	},},
+	mail: { command(target, room, user) {
 		if (!(room instanceof Users.User) || !Config.allowMail) return;
 		let targets = target.split(',');
 		if (targets.length < 2) return this.say("Please use the following format: .mail user, message");
@@ -195,7 +195,7 @@ let commands = {
 		database.mail[to].push({time: Date.now(), from: user.name, text: message});
 		Storage.exportDatabase('global');
 		this.say("Your message has been sent to " + Users.add(targets[0]).name + "!");
-	},
+	},},
 
   
   
@@ -204,7 +204,7 @@ let commands = {
 	signups: 'creategame',
   games: 'creategame',
   
-	creategame: function (target, room, user) {
+	creategame: { command(target, room, user) {
 		if (room instanceof Users.User) return;
 		if (!user.hasRank(room, '+')) return;
 		//if (!Config.games || !Config.games.includes(room.id)) return this.say("Games are not enabled for this room.");
@@ -214,14 +214,14 @@ let commands = {
 		Games.createGame(format, room);
 		if (!room.game) return;
 		room.game.signups();
-	},
+	},},
 	start: 'startgame',
-	startgame: function (target, room, user) {
+	startgame: { command(target, room, user) {
 		if (!(room instanceof Users.User) && !user.hasRank(room, '+')) return;
 		if (room.game) room.game.start();
-	},
+	},},
 	cap: 'capgame',
-	capgame: function (target, room, user) {
+	capgame: { command(target, room, user) {
 		if (room instanceof Users.User || !room.game || !user.hasRank(room, '+')) return;
 		let cap = parseInt(target);
 		if (isNaN(cap)) return this.say("Please enter a valid player cap.");
@@ -229,9 +229,9 @@ let commands = {
 		if (room.game.maxPlayers && cap > room.game.maxPlayers) return this.say(room.game.name + " cannot have more than " + room.game.maxPlayers + " players.");
 		room.game.playerCap = cap;
 		this.say("The game will automatically start at **" + cap + "** players!");
-	},
+	},},
   mp: 'maxpoints',
-	maxpoints: function (target, room, user) {
+	maxpoints: { command(target, room, user) {
 		if (room instanceof Users.User || !room.game || !user.hasRank(room, '+')) return;
 		let mp = parseInt(target);
 		if (isNaN(mp)) return this.say("Please enter a valid value.");
@@ -239,46 +239,46 @@ let commands = {
 		//if (room.game.maxPlayers && cap > room.game.maxPlayers) return this.say(room.game.name + " cannot have more than " + room.game.maxPlayers + " players.");
 		room.game.maxPoints = mp;
 		this.say("Player with **" + mp + "** points wins the game!");
-	},
+	},},
   
   
   players: 'pl',
-	pl: function (target, room, user) {
+	pl: { command(target, room, user) {
 		if ((!user.isDeveloper() && !user.hasRank(room, '+')) || !room.game) return;
 		if (typeof room.game.pl === 'function') room.game.pl();
-	},
+	},},
   
   
 	end: 'endgame',
-	endgame: function (target, room, user) {
+	endgame: { command(target, room, user) {
 		if (!(room instanceof Users.User) && !user.hasRank(room, '+')) return;
 		if (room.game) room.game.forceEnd();
-	},
+	},},
   
   answer: 'a',
-	a: function (target, room, user) {
+	a: { command(target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.guess === 'function') room.game.guess(target, user);
-	},
+	},},
   
 	join: 'joingame',
-	joingame: function (target, room, user) {
+	joingame: { command(target, room, user) {
 		if (room instanceof Users.User || !room.game) return;
 		room.game.join(user);
-	},
+	},},
 	leave: 'leavegame',
-	leavegame: function (target, room, user) {
+	leavegame: { command(target, room, user) {
 		if (room instanceof Users.User || !room.game) return;
 		room.game.leave(user);
-	},
+	},},
  elim: 'eliminate',
-	eliminate: function (target, room, user) {
+	eliminate: { command(target, room, user) {
 		if (room instanceof Users.User || !room.game || !user.hasRank(room, '@')) return;
 		room.game.elim(target);
-	},
+	},},
 	// Storage commands
 	bits: 'points',
-	points: function (target, room, user) {
+	points: { command(target, room, user) {
 		if (room !== user) return;
 		let targetUserid = target ? Tools.toId(target) : user.id;
 		/**@type {Array<string>} */
@@ -289,16 +289,16 @@ let commands = {
 		});
 		if (!points.length) return this.say((target ? target.trim() + " does not" : "You do not") + " have points on any leaderboard.");
 		this.say(points.join(" | "));
-	},
+	},},
   
-  choose: function (target, room, user) {
+  choose: { command(target, room, user) {
 		for (room in Rooms.rooms) {
 			let realRoom = Rooms.rooms[room];
 			if (realRoom.game && typeof realRoom.game.choose === 'function') realRoom.game.choose(user, target);
 		}
-	},
+	},},
 
-	suspect: function (target, room, user) {
+	suspect: { command(target, room, user) {
 		if (room.name !== user.name) return;
 		let firstComma = target.indexOf(',');
 		if (firstComma === -1) {
@@ -314,14 +314,14 @@ let commands = {
 			let realRoom = Rooms.rooms[room];
 			if (realRoom.game && typeof realRoom.game.suspect === 'function') realRoom.game.suspect(user, userID, target);
 		}
-	},
+	},},
 	
-	steal: function (target, room, user) {
+	steal: { command(target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.steal === 'function') room.game.steal(target, user);
-	},
+	},},
 	
-	count: function (target, room, user) {
+	count: { command(target, room, user) {
 		if (!room.game) {
 			if (!user.hasRank(room, '+') || Tools.toId(target) !== "start") {
 				return;
@@ -330,7 +330,7 @@ let commands = {
 		} else if (typeof room.game.count === 'function') {
 			room.game.count(target,user);
 		}
-	},
+	},},
   
   
 
@@ -338,7 +338,7 @@ let commands = {
 
 	// Tournament commands
 	tour: 'tournament',
-	tournament: function (target, room, user) {
+	tournament: { command(target, room, user) {
 		if (room instanceof Users.User || !Config.tournaments || !Config.tournaments.includes(room.id)) return;
 		if (!target) {
 			if (!user.hasRank(room, '+')) return;
@@ -375,9 +375,9 @@ let commands = {
 				this.say("/tour new " + format.id + ", elimination, " + (cap ? cap + ", " : "") + (targets.length > 2 ? ", " + targets.slice(2).join(", ") : ""));
 			}
 		}
-	},
+	},},
 	settour: 'settournament',
-	settournament: function (target, room, user) {
+	settournament: { command(target, room, user) {
 		if (room instanceof Users.User || !Config.tournaments || !Config.tournaments.includes(room.id) || !user.hasRank(room, '%')) return;
 		if (room.id in Tournaments.tournamentTimers) {
 			let warned = overwriteWarnings.has(room.id) && overwriteWarnings.get(room.id) === user.id;
@@ -410,14 +410,14 @@ let commands = {
 		if (timer <= 0) timer += 24 * 60 * 60 * 1000;
 		Tournaments.setTournamentTimer(room, timer, format.id, targets[2] ? parseInt(targets[2]) : 0);
 		this.say("The " + format.name + " tournament is scheduled for " + Tools.toDurationString(timer) + ".");
-	},
+	},},
 	canceltour: 'canceltournament',
-	canceltournament: function (target, room, user) {
+	canceltournament: { command(target, room, user) {
 		if (room instanceof Users.User || !Config.tournaments || !Config.tournaments.includes(room.id) || !user.hasRank(room, '%')) return;
 		if (!(room.id in Tournaments.tournamentTimers)) return this.say("There is no tournament scheduled for this room.");
 		clearTimeout(Tournaments.tournamentTimers[room.id]);
 		this.say("The scheduled tournament was canceled.");
-	},
+	},},
 };
 
 module.exports = commands;
