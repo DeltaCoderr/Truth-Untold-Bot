@@ -95,7 +95,7 @@ class Context {
 	 * @param {string} [newTarget]
 	 * @returns {boolean}
 	 */
-		run(newCommand, newTarget) {
+	run(newCommand, newTarget) {
 		let command = this.command;
 		let target = this.target;
 		let originalCommand = this.originalCommand;
@@ -115,24 +115,25 @@ class Context {
 			}
 		}
 		
-		if (typeof Commands[command].command !== 'function') return false;
-		
+		if (Commands[command].command && typeof Commands[command].command !== 'function') return false;
     if(Commands[command].devOnly && !this.user.isDeveloper()) return false;
-    
     if(Commands[command].perms){
       if(!this.user.hasBotRank(this.room,Commands[command].perms)) return false;
     }
-    
-if(this.room == this.user){
+    if(this.room == this.user){
   if(Commands[command].chatOnly) return false;
 }
-    
-    else{
+ else{
       if(Commands[command].pmOnly) return false;
     }
 		try {
 			// @ts-ignore Typescript bug - issue #10530
+		if(Commands[command].command){
 			Commands[command].command.call(this, target, this.room, this.user, originalCommand, this.time);
+			}
+			else{
+			Commands[command].call(this, target, this.room, this.user, originalCommand, this.time);
+			}
 		} catch (e) {
 			let stack = e.stack;
 			stack += 'Additional information:\n';
@@ -369,7 +370,8 @@ class MessageParser {
 	 * @param {User} user
 	 * @param {number} [time]
 	 */
-	parseCommand(message, room, user, time) {
+		parseCommand(message, room, user, time, sp) {
+ 
 		message = message.trim();
 		if (message.charAt(0) !== Config.commandCharacter) return;
 
@@ -390,9 +392,15 @@ class MessageParser {
 			// @ts-ignore Typescript bug - issue #10530
 			command = Commands[command];
 		}
-		if (typeof Commands[command].command !== 'function') return;
-
+		if(Commands[command].command){
+		if (Commands[command].command && typeof Commands[command].command !== 'function') return;
 		return new Context(target, room, user, command, originalCommand, time).run();
+	}
+	
+	else {
+			if (typeof Commands[command] !== 'function') return;
+		return new Context(target, room, user, command, originalCommand, time).run();
+	}
 	}
 
 	parseFormats() {
