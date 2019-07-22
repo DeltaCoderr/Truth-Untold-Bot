@@ -48,6 +48,12 @@ class Storage {
 		fs.writeFileSync('./databases/' + roomid + '.json', JSON.stringify(this.databases[roomid]));
 	}
 
+	exportCommand(file,room,cmd) {
+		//if (!(roomid in this.databases)) return;
+		fs.writeFileSync('./plugins/'+ file + '.js', cmd);
+	}
+
+
 	importDatabases() {
 		let databases = fs.readdirSync('./databases');
 		for (let i = 0, len = databases.length; i < len; i++) {
@@ -99,6 +105,19 @@ class Storage {
 		if (!(user.id in database.leaderboard)) return 0;
 		return database.leaderboard[user.id].points;
 	}
+
+  addCmd(room, cmd, name, ext){
+  let material = "let commands = { \n " + name + ": { \n command(target, room, user) { \n " +
+  cmd.split(";").join(";\n") + "\n }, \n" + ext.split(",").join(",\n") + ",},}; \n exports.commands = commands;";
+  this.exportCommand(name,room,material);
+  }
+  
+  delCmd(name){
+fs.unlinkSync("./plugins/" + name + ".js");
+  }
+
+
+
 }
 
 module.exports = new Storage();
