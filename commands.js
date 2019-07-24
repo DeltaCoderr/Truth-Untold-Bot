@@ -78,7 +78,7 @@ let commands = {
     if (!user.isDeveloper() || !(room instanceof Users.User) && !user.hasRank(room, '+')) return;
   
     this.say("/join " + target);
-  },},},},
+  },},
   
   
   pick: { command(target, room, user) {
