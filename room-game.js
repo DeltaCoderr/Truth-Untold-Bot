@@ -54,7 +54,7 @@ class Game {
 		this.started = false;
 		this.ended = false;
 		this.freeJoin = false;
-		this.canLateJoin = false;
+		this.canLateJoin = true;
 		/**@type {Map<Player, number>} */
 		this.winners = new Map();
 		/**@type {?Map<Player, number>} */
@@ -90,6 +90,10 @@ class Game {
 		this.room.say(message);
 	}
 
+  
+  
+  
+  
 	/**
 	 * @param {string} message;
 	 */
@@ -206,10 +210,18 @@ class Game {
   }
   
   
-  winUser(numBits, player) {
-    this.say("Congratulations to **" + player + "** for winning " + this.name + " game!!");
-		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
-		Games.addBits(numBits, player.name); // eslint-disable-line no-use-before-define
+  winUser(numBits, player, room) {
+    this.say("Congratulations to **" + player.name + "** for winning " + this.name + " game!!");
+		this.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
+    if(!(lb.isLb('games',room))) lb.createLb('games',room);
+    lb.addPts(numBits,'games',room,user);
+    
+    Storage.exportDatabase(room.id);
+
+    this.end();
+		//Games.addBits(numBits, player.name); // eslint-disable-line no-use-before-define
+    this.ended = true;
+    this.end();
 	}
   
   
@@ -261,7 +273,6 @@ class Game {
 		if (!(player in this.players) || this.players[player].eliminated) return;
 		if (this.started) {
 			this.players[player].eliminated = true;
-		} else {
 			delete this.players[player];
 			this.playerCount--;
 		}
@@ -488,7 +499,7 @@ class Game {
 		}
 		this.points.set(player, points);
 		if (points >= this.maxPoints) {
-			this.winUser(50, user);
+			this.winUser(20, user, room);
 		}
     if(this.ended !== true){
 		this.say("Correct! " + user.name + " advances to " + points + " point" + (points > 1 ? "s" : "") + ". (Answer" + (this.answers.length > 1 ? "s" : "") + ": __" + this.answers.join(", ") + "__)");
