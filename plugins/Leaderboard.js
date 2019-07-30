@@ -129,6 +129,7 @@ this.output = output;
   }
   
   isLb(name,room){
+    if(!Storage.databases[room.id].leaderboards) return room.say("There are no leaderboards for this room");
     if(Storage.databases[room.id].leaderboards[name]) return true;
     return false
   }
