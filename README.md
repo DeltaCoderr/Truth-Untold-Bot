@@ -44,11 +44,12 @@ From this point on, you can start the bot by running the following command:
 
 ## Credits
   * Pokem9n ([@Zerapium][9]) - Lead Developer
-  * Quinton Lee ([@sirDonovan][6]) - Lead developer
+  * Quinton Lee ([@sirDonovan][6]) - Base Repository [Cassius][10]
   * [Pokemon Showdown][1] - In-game data files, Tools module, and various helper functions
   * [Contributors][7]
 
   [6]: https://github.com/sirDonovan
+[10]: https://github.com/sirDonovan/Cassius
   [7]: https://github.com/sirDonovan/Cassius/graphs/contributors
 
 ## License
