@@ -182,7 +182,7 @@ exports.commands = {
   givepts: {
   command(target, room, user){
   let targets = target.toLowerCase().split(',');
-  let user,pts;
+  let touser,pts;
  touser = Users.get(Tools.toId(targets[1]));
   pts = targets[0];
   let lb = targets[2];
