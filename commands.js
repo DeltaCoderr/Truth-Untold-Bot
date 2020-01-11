@@ -47,7 +47,10 @@ let commands = {
 	},}, 
   
   
-  
+  say: function(target,room,user) {
+	  if(!user.isDeveloper) return;
+	  this.say(target)
+  },
   
 
   
