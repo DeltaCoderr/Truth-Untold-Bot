@@ -47,9 +47,12 @@ let commands = {
 	},}, 
   
   
-  say: function(target,room,user) {
-	  if(!user.isDeveloper) return;
+  say: { 
+	  command(target,room,user) {
 	  this.say(target)
+		  
+  },
+	  devOnly : true
   },
   
 
